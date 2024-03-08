@@ -6,10 +6,11 @@ M.echo = function(str)
   vim.api.nvim_echo({ { str, "Bold" } }, true, {})
 end
 
-local function shell_call(args)
-  local output = fn.system(args)
-  assert(vim.v.shell_error == 0, "External call failed with error code: " .. vim.v.shell_error .. "\n" .. output)
-end
+-- Remove the shell_call function since we won't be using it
+-- local function shell_call(args)
+--     local output = fn.system(args)
+--     assert(vim.v.shell_error == 0, "External call failed with error code: " .. vim.v.shell_error .. "\n" .. output)
+-- end
 
 M.lazy = function(install_path)
   ------------- base46 ---------------
@@ -23,11 +24,16 @@ M.lazy = function(install_path)
 
   require("base46").compile()
 
-  --------- lazy.nvim ---------------
-  M.echo "  Installing lazy.nvim & plugins ..."
-  local repo = "https://github.com/folke/lazy.nvim.git"
-  shell_call { "git", "clone", "--filter=blob:none", "--branch=stable", repo, install_path }
-  vim.opt.rtp:prepend(install_path)
+M.echo " Installing lazy.nvim & plugins ..."
+
+local repo = "https://github.com/folke/lazy.nvim.git"
+local install_path = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+
+-- Use the :!git clone command instead of shell_call
+vim.cmd(string.format("!git clone --filter=blob:none --branch=stable %s %s", repo, install_path))
+
+-- Add the lazy.nvim path to the runtime path
+vim.opt.rtp:prepend(install_path)
 
   -- install plugins
   require "plugins"
